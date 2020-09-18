@@ -1,0 +1,12 @@
+body {
+    padding-top: 50px;
+    font-family: Sans-Serif;
+  }
+.starter-template {
+    padding: 40px 15px;
+    text-align: center;
+}
+.navbar-right {
+    float: right;
+}
+  

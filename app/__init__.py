@@ -12,4 +12,6 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 from app.usermgmt.views import usermgmt
+from app.playlist.views import playlist
 app.register_blueprint(usermgmt, url_prefix='/')
+app.register_blueprint(playlist, url_prefix='/')
