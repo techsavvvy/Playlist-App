@@ -1,20 +1,22 @@
 from app.usermgmt.forms import LoginForm, RegisterForm
 from app.usermgmt.models import User
-from app import db
+from flask import Blueprint
 from app import app
 
-from flask import Blueprint
 from flask import Flask, render_template, redirect, url_for
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-
+from flask_bootstrap import Bootstrap
+from flask_wtf import FlaskForm 
+from wtforms import StringField, PasswordField, BooleanField
+from wtforms.validators import InputRequired, Email, Length
+from flask_sqlalchemy  import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_migrate import Migrate
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-
+db = SQLAlchemy(app)
 usermgmt=Blueprint('usermgmt', __name__, url_prefix='/')
 
 
@@ -53,6 +55,7 @@ def signup():
         db.session.commit()
 
         return '<h1>New user has been created!</h1>'
+        #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
     return render_template('signup.html', form=form)
 
