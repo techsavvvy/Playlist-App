@@ -1,0 +1,120 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="shortcut icon" href={{url_for('static', filename='favicon.ico')}}>
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
+<link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='signin.css')}}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand nav-brand-custom" href="{{ url_for('playlist.dashboard') }}"><img class="logo-align"
+                    src={{url_for('static', filename='favicon.ico')}} />Playlistify</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav align-right">
+                <li><a style="color: white;" href="{{ url_for('usermgmt.logout') }}">Log Out</a></li>
+            </ul>
+
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% for message in get_flashed_messages() %}
+    <div class="alert alert-warning flash-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message }}
+    </div>
+    {% endfor %}
+
+    {% block page_content %}{% endblock %}
+</div>
+
+<div class="title">
+    <a class="decoration-unset" href="{{ url_for('playlist.dashboard') }}">Home </a>/
+    <span>{{play_dict.playlist_name}}</span>
+</div>
+
+<div class="playlist-header">
+    <p class="sub-title">Song Collections</p>
+    <a class="link-btn" data-toggle="modal" data-target="#myModal">Add new</a></p>
+</div>
+
+<form method="get" action="{{ url_for('playlist.collection',id=play_dict.id) }}" name="collection_search_form"
+    class="form-create search-form">
+    {{ formc.hidden_tag() }}
+    {{ wtf.form_field(formc.search) }}
+    <p align="right" style="margin:0;margin-top: -50px;margin-left: 101%;">
+        <button align="right" class="btn btn-lg btn-primary btn-search-submit" type="submit">Search</button></p>
+</form>
+
+<div class="grid">
+    {%for song in coll_dict%}
+    <div class="grid-box">
+        <div><a href="{{ url_for('playlist.stream', pid=play_dict.id, sid=song.id) }}" class="playlist-details">
+                <div class="card-title">{{song.title}}</div>
+                <div>&bull; {{song.album}} &bull; {{song.artist}}</div>
+            </a></div>
+        <form method="post" align="right" action="{{ url_for('playlist.collection_delete') }}">
+            <button type="submit" name="id" value={{song.id}} class="btn-rm"><i class="fa fa-trash-o"></i></button>
+        </form>
+    </div>
+
+    {% endfor %}
+</div>
+
+{%if not coll_dict%}
+<div class="container-fluid shade-box">
+    <p>You don't have any songs in the playlist</p>
+    <p><a class="link-btn" data-toggle="modal" data-target="#myModal">Click here</a> to add one</p>
+</div>
+{%endif%}
+
+<div class="container">
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add a new song to {{play_dict.playlist_name}}</h4>
+                </div>
+                <div class="modal-body">
+
+                    <div class="">
+
+                        <form method="post" action='/playlist/{{play_dict.id}}' name="collection_create_form"
+                            class="form-create" enctype="multipart/form-data" role="form">
+                            {{ form.hidden_tag() }}
+                            {{ wtf.form_field(form.title) }}
+                            {{ wtf.form_field(form.album) }}
+                            {{ wtf.form_field(form.artist) }}
+                            {{ wtf.form_field(form.file)}}
+                            <p align="right"><button align="right" class="btn btn-lg btn-primary btn-submit"
+                                    type="submit">Submit</button></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

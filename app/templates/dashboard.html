@@ -11,6 +11,7 @@ Dashboard
 <link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}">
 <link rel="stylesheet" href="{{url_for('static', filename='signin.css')}}">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+<link rel="shortcut icon" href={{url_for('static', filename='favicon.ico')}}>
 {% endblock %}
 
 {% block content %}
@@ -24,17 +25,18 @@ Dashboard
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="{{ url_for('playlist.dashboard') }}">Playlist App</a>
+      <a class="navbar-brand nav-brand-custom" href="{{ url_for('playlist.dashboard') }}"><img class="logo-align"
+          src={{url_for('static', filename='favicon.ico')}} />Playlistify</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav align-right">
-        <li><a href="{{ url_for('usermgmt.logout') }}">Log Out</a></li>
+        <li><a style="color: white;" href="{{ url_for('usermgmt.logout') }}">Log Out</a></li>
       </ul>
     </div>
   </div>
 </nav>
-<div>
-  <p class="title">Home<span>
+<div class="title">
+  <span>Home</span>
 </div>
 <div class="playlist-header">
   <p class="sub-title">My Playlist</p>
@@ -42,19 +44,24 @@ Dashboard
 </div>
 
 <div class="grid">
-
   {% for playlist in dict %}
   <div class="grid-box">
-    <div><a href="/playlist/{{playlist.id }}" class="playlist-details">    
-    <div>{{playlist.playlist_name}}</div><div>{{playlist.genre}}</div>
-    </a></div>
+    <div>
+      <a href="/playlist/{{playlist.id }}" class="playlist-details">
+        <div class="card-title">{{playlist.playlist_name}}</div>
+        <div>&bull; {{playlist.genre}}</div>
+      </a></div>
+
+
     <form method="post" align="right" action="{{ url_for('playlist.playlist_delete') }}">
       <button type="submit" name="id" value={{playlist.id}} class="btn-rm"><i class="fa fa-trash-o"></i></button>
     </form>
+
   </div>
+
   {% endfor %}
-  
 </div>
+
 
 {%if not dict%}
 <div class="container-fluid shade-box">
@@ -78,7 +85,8 @@ Dashboard
               {{ wtf.form_field(form.name) }}
               {{ wtf.form_field(form.genre) }}
               {{ wtf.form_field(form.description) }}
-              <p class="submit-align"><button type="submit" class="btn btn-default btn-align">Submit</button></p>
+              <p align="right"><button align="right" class="btn btn-lg btn-primary btn-submit"
+                  type="submit">Submit</button></p>
             </form>
           </div>
         </div>

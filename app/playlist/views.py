@@ -1,5 +1,7 @@
 import flask
+from app import app
 import os
+import flask_whooshalchemyplus
 
 from flask import Blueprint
 from flask import request
@@ -11,7 +13,7 @@ from flask_login import current_user, login_required
 from flask import jsonify
 
 from app import db
-from app.playlist.forms import PlaylistCreateForm, CollectionsCreateForm
+from app.playlist.forms import PlaylistCreateForm, CollectionsCreateForm, CollectionSearchForm
 from app.playlist.models import Playlist
 from app.playlist.models import Collection
 from app.playlist.serializer import get_playlist_serialized, get_collection_serialized
@@ -24,6 +26,7 @@ from wtforms.validators import InputRequired, Email, Length
 from werkzeug.utils import secure_filename
 
 playlist=Blueprint('playlist', __name__, url_prefix='/')
+flask_whooshalchemyplus.whoosh_index(app, Collection)
 
 @playlist.route('/dashboard')
 @login_required
@@ -35,6 +38,7 @@ def dashboard():
     return render_template('dashboard.html', dict=serialized, form=form)
 
 @playlist.route('/playlist', methods=['GET', 'POST', 'DELETE'])
+@login_required
 def playlistcreate():
     form=PlaylistCreateForm()
     if flask.request.method == 'POST':
@@ -50,6 +54,7 @@ def playlistcreate():
     return redirect(url_for('playlist.dashboard'))
 
 @playlist.route('/playlist/delete', methods=['POST'])
+@login_required
 def playlist_delete():
     queryset = Playlist.query.get(request.form['id'])
     db.session.delete(queryset)
@@ -58,12 +63,13 @@ def playlist_delete():
     return redirect(url_for('playlist.dashboard'))
 
 @playlist.route('/playlist/<id>', methods=['GET', 'POST', 'DELETE'])
+@login_required
 def collection(id):
     form=CollectionsCreateForm(csrf_enabled=False)
+    formc=CollectionSearchForm(csrf_enabled=False)
     if flask.request.method == 'POST':
 
         if form.validate_on_submit():
-            print(check_file_name_already_exist(form.file.data.filename,id))
             if check_file_name_already_exist(form.file.data.filename,id):
                 flash("Oops! You have already uploaded a music with same filename in this playlist. Please rename the file and try again.")
             else:     
@@ -85,46 +91,62 @@ def collection(id):
 
     if flask.request.method == 'GET':
         collection_queryset = Collection.query.filter_by(playlist_id=id)
+        if(request.args and request.args['search']):
+            search_queryset = Collection.query.filter_by(playlist_id=id).whoosh_search(request.args['search'])
+            if search_queryset.count() > 0:
+                collection_queryset = Collection.query.whoosh_search(request.args['search'])
+            else:
+                flash("Oops! Song not found. Try again with different keyword")
         collection_serialized = [item.__dict__ for item in collection_queryset]
         playlist_queryset = Playlist.query.get(id)
         playlist_serialized = get_playlist_serialized(playlist_queryset)
-        print(playlist_serialized)
         return render_template(
             'playlist-view.html', coll_dict=collection_serialized, 
-            play_dict=playlist_serialized, form=form
+            play_dict=playlist_serialized, form=form, formc=formc
         )
 
+@playlist.route('/search/<id>')
+@login_required
+def search_collection(id):
+    formc=CollectionSearchForm(csrf_enabled=False)
+    form=CollectionsCreateForm(csrf_enabled=False)
+    collection_queryset = Collection.query.filter_by(playlist_id=id)
+    collection_serialized = [item.__dict__ for item in collection_queryset]
+    playlist_queryset = Playlist.query.get(id)
+    playlist_serialized = get_playlist_serialized(playlist_queryset)
+    return render_template(
+        'playlist-view.html', coll_dict=collection_serialized, 
+        play_dict=playlist_serialized, form=form, formc=formc
+    )
+
 @playlist.route('/collection/delete',methods=['POST'])
+@login_required
 def collection_delete():
-    print(request.form['id'])
     queryset = Collection.query.get(request.form['id'])
-    print(queryset.playlist_id)
     db.session.delete(queryset)
     db.session.commit()
 
     return redirect(url_for('playlist.collection', id=queryset.playlist_id))
 
 @playlist.route('playlist/<pid>/stream/<sid>', methods=['POST', 'GET'])
+@login_required
 def stream(pid, sid):
-    print(pid,sid)
     collection_queryset = Collection.query.get(sid)
     collection_serialized = get_collection_serialized(collection_queryset)
     playlist_queryset = Playlist.query.get(pid)
     playlist_serialized = get_playlist_serialized(playlist_queryset)
-    print(playlist_serialized,collection_queryset)
     return render_template(
         'stream.html', coll_dict=collection_queryset.__dict__, 
         play_dict=playlist_serialized
     )
 
-# For testing purpose, will be modifies once audio retrieve is implemented
 @playlist.route("col/mp3")
-def streamogg():
+@login_required
+def streammp3():
     def generate():
-        with open(os.path.join('app/audio/', "file_example_MP3_700KB___2___.mp3"), "rb") as fogg:
-            print()
-            data = fogg.read(1024)
+        with open(os.path.join('app/audio/', "file_example_MP3_700KB___6___.mp3"), "rb") as mp3:
+            data = mp3.read(1024)
             while data:
                 yield data
-                data = fogg.read(1024)
-    return Response(generate(), mimetype="audio/ogg")
+                data = mp3.read(1024)
+    return Response(generate(), mimetype="audio/mp3")

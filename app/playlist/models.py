@@ -1,3 +1,5 @@
+import app
+
 from app import db
 
 class Playlist(db.Model):
@@ -8,9 +10,12 @@ class Playlist(db.Model):
     user_id = db.Column(db.BigInteger, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
 
 class Collection(db.Model):
+    __searchable__=['title','artist','album']
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50))
     artist = db.Column(db.String(50))
     album = db.Column(db.String(50))
     file = db.Column(db.String(99))
     playlist_id = db.Column(db.BigInteger, db.ForeignKey('playlist.id', ondelete='CASCADE'), nullable=False)
+

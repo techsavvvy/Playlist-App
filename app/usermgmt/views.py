@@ -24,6 +24,9 @@ usermgmt=Blueprint('usermgmt', __name__, url_prefix='/')
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('usermgmt.login'))
 
 @usermgmt.route('/')
 def index():
@@ -55,7 +58,6 @@ def signup():
         db.session.commit()
 
         return '<h1>New user has been created!</h1>'
-        #return '<h1>' + form.username.data + ' ' + form.email.data + ' ' + form.password.data + '</h1>'
 
     return render_template('signup.html', form=form)
 
