@@ -6,3 +6,5 @@ from flask import *
 from app import *
 
 os.environ['PYTHONINSPECT'] = 'True'
+
+# Flask-WhooshAlchemyPlus==0.7.5
