@@ -2,14 +2,18 @@
 
 Playlistity is a powerful application to create your favourite playlist and enhance your music experience with simplicity.
 
-# Installation 
+## Framework:
+
+[Flask](https://flask.palletsprojects.com/en/1.1.x/)
+
+## Installation 
 
 Required Packages:
     - [Python3](https://docs.python-guide.org/starting/install3/linux/)
     - [PIP3](https://pypi.org/project/pip/)
     - [GIT](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
-clone the repository
+Clone the repository
 ```sh
 $ git init
 $ git remote add origin https://github.com/techsavvvy/Playlist-App.git
@@ -21,7 +25,7 @@ Run the following command to create and activate virtual environment
 source virtual_env.sh
 ```
 
-Run the following command to install app dependencies (pip packages) and start to start the local web server
+Run the following command to install app dependencies (pip packages) and to start the local web server
 
 ```sh
 $ bash run.sh
@@ -30,12 +34,12 @@ $ bash run.sh
 ## Features
 
 ### 1) Landing page for Login / Signup
-Classic Landing page for the application with Login/Signup.
+Classic Landing page for the application with Login / Signup.
 
 ![](https://github.com/techsavvvy/Playlist-App/blob/master/screenshots/index.png?raw=true)
 
 ### 2) Simple Signup
-Simple straight-forward signup with no email verification (will be included in the later versions) with basic email validation.
+Simple straight-forward signup with no user verification (will be included in the later versions) with basic email validation.
 
 ![](https://github.com/techsavvvy/Playlist-App/blob/master/screenshots/signup.png?raw=true)
 
