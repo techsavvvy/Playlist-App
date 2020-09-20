@@ -3,7 +3,7 @@ from app.usermgmt.models import User
 from flask import Blueprint
 from app import app
 
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from wtforms import StringField, PasswordField, BooleanField
@@ -55,9 +55,12 @@ def signup():
         hashed_password = generate_password_hash(form.password.data, method='sha256')
         new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(new_user)
-        db.session.commit()
+        try:
+            db.session.commit()
+            flash("Congrats! Successfully created user. Please login using this username and password")
+        except Exception as e:
+            flash("User with this credentials already exist! Please try a different username, email and password")
 
-        return '<h1>New user has been created!</h1>'
 
     return render_template('signup.html', form=form)
 

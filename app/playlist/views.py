@@ -17,7 +17,7 @@ from app.playlist.forms import PlaylistCreateForm, CollectionsCreateForm, Collec
 from app.playlist.models import Playlist
 from app.playlist.models import Collection
 from app.playlist.serializer import get_playlist_serialized, get_collection_serialized
-from app.playlist.functions import is_valid_file, modify_file_name, check_file_name_already_exist
+from app.playlist.functions import is_valid_file, get_modified_file_name, check_file_name_already_exist, delete_file_from_audio_directory
 from app import ALLOWED_EXTENSIONS, UPLOAD_FOLDER
 from marshmallow import Serializer, fields, pprint
 
@@ -56,6 +56,20 @@ def playlistcreate():
 @playlist.route('/playlist/delete', methods=['POST'])
 @login_required
 def playlist_delete():
+    coll_queryset = Collection.query.filter_by(playlist_id=request.form['id'])
+    print(coll_queryset.count())
+    try:
+        if coll_queryset.count() > 1:
+            for quer in coll_queryset:
+                db.session.delete(quer)
+                db.session.commit()
+                delete_file_from_audio_directory(quer)
+        else:
+                db.session.delete(coll_queryset[0])
+                db.session.commit()
+                delete_file_from_audio_directory(coll_queryset[0])
+    except Exception as e:
+        flash("Oops unable to delete at the moment. Please try again later")
     queryset = Playlist.query.get(request.form['id'])
     db.session.delete(queryset)
     db.session.commit()
@@ -75,13 +89,13 @@ def collection(id):
             else:     
                 new_collection = Collection(
                     title=form.title.data, artist=form.artist.data, 
-                    album=form.album.data, playlist_id=id, file=modify_file_name(form.file.data.filename,id)
+                    album=form.album.data, playlist_id=id, file=get_modified_file_name(form.file.data.filename,id)
                 )
                 file=form.file.data
                 if(form.file.data and is_valid_file(form.file.data.filename)):
-                    filename = secure_filename(modify_file_name(file.filename,id))
+                    filename = secure_filename(get_modified_file_name(file.filename,id))
                     file.save(os.path.join('app/audio', filename))
-
+                    
                     db.session.add(new_collection)
                     db.session.commit()
                 else:
@@ -100,10 +114,13 @@ def collection(id):
         collection_serialized = [item.__dict__ for item in collection_queryset]
         playlist_queryset = Playlist.query.get(id)
         playlist_serialized = get_playlist_serialized(playlist_queryset)
-        return render_template(
-            'playlist-view.html', coll_dict=collection_serialized, 
-            play_dict=playlist_serialized, form=form, formc=formc
-        )
+        if playlist_queryset and (playlist_queryset.user_id==current_user.id):
+            return render_template(
+                'playlist-view.html', coll_dict=collection_serialized, 
+                play_dict=playlist_serialized, form=form, formc=formc
+            )
+        else:
+            return redirect(url_for('playlist.dashboard'))
 
 @playlist.route('/search/<id>')
 @login_required
@@ -125,7 +142,7 @@ def collection_delete():
     queryset = Collection.query.get(request.form['id'])
     db.session.delete(queryset)
     db.session.commit()
-
+    os.remove(os.path.join('app/audio/', str(queryset.file)))
     return redirect(url_for('playlist.collection', id=queryset.playlist_id))
 
 @playlist.route('playlist/<pid>/stream/<sid>', methods=['POST', 'GET'])
@@ -140,11 +157,11 @@ def stream(pid, sid):
         play_dict=playlist_serialized
     )
 
-@playlist.route("col/mp3")
+@playlist.route("col/mp3/<file>")
 @login_required
-def streammp3():
+def streammp3(file):
     def generate():
-        with open(os.path.join('app/audio/', "file_example_MP3_700KB___6___.mp3"), "rb") as mp3:
+        with open(os.path.join('app/audio/', str(file)), "rb") as mp3:
             data = mp3.read(1024)
             while data:
                 yield data

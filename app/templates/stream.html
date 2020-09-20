@@ -44,7 +44,7 @@
 
 <div class="audio-align">
   <audio controls>
-    <source src="{{url_for('playlist.streammp3')}}" type="audio/mp3" />
+    <source src="{{url_for('playlist.streammp3', file=coll_dict.file)}}" type="audio/mp3" />
   </audio>
 </div>
 {% endblock %}
