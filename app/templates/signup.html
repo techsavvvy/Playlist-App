@@ -22,8 +22,8 @@ Sign Up
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand nav-brand-custom" href="#"><img class="logo-align"
-          src={{url_for('static', filename='favicon.ico')}} />Playlistify</a>
+      <a class="navbar-brand nav-brand-custom" href="{{ url_for('usermgmt.index') }}"><img class="logo-align"
+        src={{url_for('static', filename='favicon.ico')}} />Playlistify</a>
     </div>
     <div id="navbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav navbar-right">
@@ -33,7 +33,7 @@ Sign Up
     </div>
   </div>
 </nav>
-
+<img src="{{url_for('static', filename="index.jpg")}}" width="100%" height="100%" style="opacity: 0.3; z-index: -1; position: absolute;">
 <div class="container">
   {% for message in get_flashed_messages() %}
   <div class="alert alert-warning flash-warning">
@@ -49,7 +49,7 @@ Sign Up
 <div class="container">
 
   <form class="form-signin" method="POST" action="/signup">
-    <h2 class="form-signin-heading">Sign Up</h2>
+    <h1 class="form-signin-heading">Sign Up</h1>
     {{ form.hidden_tag() }}
     {{ wtf.form_field(form.username) }}
     {{ wtf.form_field(form.email) }}

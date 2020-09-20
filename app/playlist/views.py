@@ -5,12 +5,13 @@ import flask_whooshalchemyplus
 
 from flask import Blueprint
 from flask import request
-from flask import Flask, render_template, redirect, url_for, flash, Response
+from flask import Flask, render_template, redirect, url_for, flash, Response,send_file, send_from_directory
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm 
 from flask_sqlalchemy  import SQLAlchemy
 from flask_login import current_user, login_required
 from flask import jsonify
+from urllib.parse import urlparse
 
 from app import db
 from app.playlist.forms import PlaylistCreateForm, CollectionsCreateForm, CollectionSearchForm
@@ -57,7 +58,6 @@ def playlistcreate():
 @login_required
 def playlist_delete():
     coll_queryset = Collection.query.filter_by(playlist_id=request.form['id'])
-    print(coll_queryset.count())
     try:
         if coll_queryset.count() > 1:
             for quer in coll_queryset:
@@ -65,11 +65,13 @@ def playlist_delete():
                 db.session.commit()
                 delete_file_from_audio_directory(quer)
         else:
-                db.session.delete(coll_queryset[0])
-                db.session.commit()
-                delete_file_from_audio_directory(coll_queryset[0])
+            delete_file_from_audio_directory(coll_queryset.first())
+            db.session.delete(coll_queryset.first())
+            db.session.commit()
     except Exception as e:
         flash("Oops unable to delete at the moment. Please try again later")
+        return redirect(url_for('playlist.dashboard'))
+
     queryset = Playlist.query.get(request.form['id'])
     db.session.delete(queryset)
     db.session.commit()
@@ -148,17 +150,18 @@ def collection_delete():
 @playlist.route('playlist/<pid>/stream/<sid>', methods=['POST', 'GET'])
 @login_required
 def stream(pid, sid):
+    url = urlparse(request.base_url)
     collection_queryset = Collection.query.get(sid)
     collection_serialized = get_collection_serialized(collection_queryset)
     playlist_queryset = Playlist.query.get(pid)
     playlist_serialized = get_playlist_serialized(playlist_queryset)
+    share_link=url.scheme+'://'+ url.netloc+'/col/mp3/'+collection_queryset.file
     return render_template(
         'stream.html', coll_dict=collection_queryset.__dict__, 
-        play_dict=playlist_serialized
+        play_dict=playlist_serialized, share_link=share_link
     )
 
 @playlist.route("col/mp3/<file>")
-@login_required
 def streammp3(file):
     def generate():
         with open(os.path.join('app/audio/', str(file)), "rb") as mp3:
@@ -167,3 +170,7 @@ def streammp3(file):
                 yield data
                 data = mp3.read(1024)
     return Response(generate(), mimetype="audio/mp3")
+
+@playlist.route("download/mp3/<file>")
+def downloadmp3(file):
+    return send_file(os.path.join('audio/', str(file)), as_attachment=True)

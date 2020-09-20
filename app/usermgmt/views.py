@@ -43,7 +43,7 @@ def login():
                 login_user(user, remember=form.remember.data)
                 return redirect(url_for('playlist.dashboard'))
 
-        return '<h1>Invalid username or password</h1>'
+        flash("Invalid Username/password")
 
     return render_template('login.html', form=form)
 

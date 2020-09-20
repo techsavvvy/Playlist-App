@@ -58,6 +58,7 @@ Dashboard
     <a class="link-btn" data-toggle="modal" data-target="#myModal">Add new</a></p>
 </div>
 
+{%if coll_dict%}
 <form method="get" action="{{ url_for('playlist.collection',id=play_dict.id) }}" name="collection_search_form"
     class="form-create search-form">
     {{ formc.hidden_tag() }}
@@ -65,6 +66,7 @@ Dashboard
     <p align="right" style="margin:0;margin-top: -50px;margin-left: 101%;">
         <button align="right" class="btn btn-lg btn-primary btn-search-submit" type="submit">Search</button></p>
 </form>
+{%endif%}
 
 <div class="grid">
     {%for song in coll_dict%}

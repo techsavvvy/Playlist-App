@@ -1,6 +1,7 @@
 body {
   padding-top: 50px;
   font-family: Sans-Serif;
+  overflow: hidden;
 }
 .starter-template {
   padding: 40px 15px;

@@ -250,6 +250,7 @@ a.playlist-details:hover {
   padding: 5px !important;
   margin: 0 !important;
   margin-top: 2rem !important;
+  color: brown !important;
 }
 
 .search-form {
@@ -260,4 +261,11 @@ a.playlist-details:hover {
 .btn-search-submit {
   padding: 8px !important;
   font-size: 14px;
+}
+
+.share-link{
+  font-size:14px;
+  font-weight: 600;
+  color: #428bca;
+  margin-top: 4rem;
 }

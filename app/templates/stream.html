@@ -47,4 +47,9 @@
     <source src="{{url_for('playlist.streammp3', file=coll_dict.file)}}" type="audio/mp3" />
   </audio>
 </div>
+<div class= "audio-align">
+  <p class="share-link">Share link:</p>
+  <input size="{{share_link|length-8}}" type="text" class="form-control" value="{{share_link}}">
+  
+</div>
 {% endblock %}

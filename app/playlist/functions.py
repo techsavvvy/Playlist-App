@@ -1,6 +1,7 @@
 from app import ALLOWED_EXTENSIONS
 import os
 
+
 def is_valid_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -17,3 +18,4 @@ def check_file_name_already_exist(filename, id):
  
 def delete_file_from_audio_directory(queryset):
     os.remove(os.path.join('app/audio/', str(queryset.file)))
+
